@@ -15,7 +15,7 @@ const ProductSchema = z.object({
   stock: z.coerce.number().int().min(0),
   categoryId: z.string().min(1),
   brandId: z.string().optional().or(z.literal("")),
-  partType: z.enum(["OEM", "AFTERMARKET", "USED", "PERFORMANCE"]),
+  partType: z.enum(["OEM", "AFTERMARKET"]),
   condition: z.enum(["NEW", "USED", "REFURBISHED"]),
   images: z.string().optional().default(""),
   isActive: z.coerce.boolean().optional().default(true),

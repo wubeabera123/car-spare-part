@@ -24,8 +24,8 @@ export function LoginForm() {
         <input
           id="email"
           name="email"
-          type="email"
-          required
+          type="text"
+          autoComplete="email"
           className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm focus-ring"
         />
         {state?.errors?.email && (
@@ -42,8 +42,7 @@ export function LoginForm() {
           id="password"
           name="password"
           type="password"
-          required
-          minLength={6}
+          autoComplete="current-password"
           className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm focus-ring"
         />
         {state?.errors?.password && (

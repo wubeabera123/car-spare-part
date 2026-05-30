@@ -23,7 +23,7 @@ export function RegisterForm() {
         <input
           id="name"
           name="name"
-          required
+          autoComplete="name"
           className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm focus-ring"
         />
         {state?.errors?.name && (
@@ -37,8 +37,8 @@ export function RegisterForm() {
         <input
           id="email"
           name="email"
-          type="email"
-          required
+          type="text"
+          autoComplete="email"
           className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm focus-ring"
         />
         {state?.errors?.email && (
@@ -55,8 +55,7 @@ export function RegisterForm() {
           id="password"
           name="password"
           type="password"
-          required
-          minLength={8}
+          autoComplete="new-password"
           className="mt-1.5 h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm focus-ring"
         />
         {state?.errors?.password && (

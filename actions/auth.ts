@@ -70,13 +70,16 @@ export async function registerAction(
     await signIn("credentials", {
       email: normalizedEmail,
       password: parsed.data.password,
-      redirect: false,
+      redirectTo: "/",
     });
-  } catch {
-    // Account was created; if auto sign-in fails, send user to login page instead.
-    redirect("/login");
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // Auto sign-in failed after registration — send to login
+      redirect("/login");
+    }
+    // Re-throw NEXT_REDIRECT so Next.js handles the redirect
+    throw error;
   }
-  redirect("/");
 }
 
 export async function loginAction(
@@ -94,23 +97,21 @@ export async function loginAction(
   const normalizedEmail = parsed.data.email.toLowerCase();
 
   try {
-    const result = await signIn("credentials", {
+    await signIn("credentials", {
       email: normalizedEmail,
       password: parsed.data.password,
-      redirect: false,
+      redirectTo: "/",
     });
-
-    if (result && "error" in result && result.error) {
-      return { message: "Invalid email or password." };
-    }
   } catch (error) {
-    if (error instanceof AuthError && error.type === "CredentialsSignin") {
-      return { message: "Invalid email or password." };
+    if (error instanceof AuthError) {
+      if (error.type === "CredentialsSignin") {
+        return { message: "Invalid email or password." };
+      }
+      return { message: "Unable to sign in right now. Please try again." };
     }
-
-    return { message: "Unable to sign in right now. Please try again." };
+    // Re-throw NEXT_REDIRECT and other non-auth errors so Next.js can handle them
+    throw error;
   }
-  redirect("/");
 }
 
 // ── Forgot password ───────────────────────────────────────────────────────────

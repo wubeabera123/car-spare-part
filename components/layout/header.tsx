@@ -1,7 +1,20 @@
 import Link from "next/link";
-import { Search, ShoppingCart, Heart, User, Wrench } from "lucide-react";
+import Image from "next/image";
+import {
+  Search,
+  ShoppingCart,
+  Heart,
+  Wrench,
+  LogOut,
+  User,
+  LayoutDashboard,
+  Package,
+  Store,
+} from "lucide-react";
 import { buttonStyles } from "@/components/ui/button";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { auth, signOut } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 const NAV_LINKS = [
   { href: "/products", label: "Shop All" },
@@ -13,14 +26,27 @@ const NAV_LINKS = [
   { href: "/deals", label: "Deals" },
 ];
 
-export function Header() {
+export async function Header() {
+  const session = await auth();
+  const user = session?.user;
+
+  // Always fetch fresh image from DB — avoids stale JWT after avatar update
+  const dbImage = user?.id
+    ? ((
+        await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { image: true },
+        })
+      )?.image ?? null)
+    : null;
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/85 backdrop-blur supports-backdrop-filter:bg-surface/65">
       {/* Announcement bar */}
       <div className="bg-brand-900 text-white text-xs">
         <div className="container-page flex h-9 items-center justify-between">
           <p className="hidden sm:block">
-            Free shipping on orders over $99 · Genuine OEM &amp; quality
+            Free shipping on orders over ETB 5,000 · Genuine OEM &amp; quality
             aftermarket parts
           </p>
           <div className="flex items-center gap-4">
@@ -79,32 +105,114 @@ export function Header() {
           >
             <Heart className="h-5 w-5" />
           </Link>
-          <Link
-            href="/account"
-            className="hidden sm:inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-surface-muted focus-ring"
-            aria-label="Account"
-          >
-            <User className="h-5 w-5" />
-          </Link>
+
           <Link
             href="/cart"
             className="relative inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-surface-muted focus-ring"
             aria-label="Cart"
           >
             <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent-600 px-1 text-[10px] font-semibold text-white">
-              0
-            </span>
           </Link>
-          <Link
-            href="/login"
-            className={
-              buttonStyles({ size: "sm" }) + " ml-2 hidden sm:inline-flex"
+
+          {user ? (
+            <div className="relative ml-2 hidden sm:block group">
+              {/* Avatar button */}
+              <button className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-muted focus-ring">
+                <span className="relative grid h-6 w-6 shrink-0 overflow-hidden rounded-full bg-accent-600 text-xs text-white font-bold place-items-center">
+                  {dbImage ? (
+                    <Image
+                      src={dbImage}
+                      alt="Avatar"
+                      fill
+                      sizes="24px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    (user.name?.[0]?.toUpperCase() ?? "U")
+                  )}
+                </span>
+                <span className="max-w-[100px] truncate">
+                  {user.name ?? user.email}
+                </span>
+              </button>
+
+              {/* Dropdown */}
+              <div className="absolute right-0 top-full mt-1 w-52 rounded-xl border border-border bg-surface shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity z-50">
+                <div className="border-b border-border px-4 py-3">
+                  <p className="text-xs text-foreground-muted">Signed in as</p>
+                  <p className="truncate text-sm font-medium">{user.email}</p>
+                </div>
+                <div className="py-1">
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-muted"
+                  >
+                    <User className="h-4 w-4" /> My Account
+                  </Link>
+                  <Link
+                    href="/account/orders"
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-muted"
+                  >
+                    <Package className="h-4 w-4" /> Orders
+                  </Link>
+                  {(user.role === "SELLER" || user.role === "ADMIN") && (
+                    <Link
+                      href="/seller"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-muted"
+                    >
+                      <Store className="h-4 w-4" /> Seller Dashboard
+                    </Link>
+                  )}
+                  {user.role === "ADMIN" && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-surface-muted"
+                    >
+                      <LayoutDashboard className="h-4 w-4" /> Admin Panel
+                    </Link>
+                  )}
+                </div>
+                <div className="border-t border-border py-1">
+                  <form
+                    action={async () => {
+                      "use server";
+                      await signOut({ redirectTo: "/" });
+                    }}
+                  >
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-accent-600 hover:bg-surface-muted"
+                    >
+                      <LogOut className="h-4 w-4" /> Sign out
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className={
+                buttonStyles({ size: "sm" }) + " ml-2 hidden sm:inline-flex"
+              }
+            >
+              Sign in
+            </Link>
+          )}
+
+          <MobileNav
+            user={
+              user
+                ? {
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    image: dbImage,
+                  }
+                : null
             }
-          >
-            Sign in
-          </Link>
-          <MobileNav />
+          />
         </div>
       </div>
 

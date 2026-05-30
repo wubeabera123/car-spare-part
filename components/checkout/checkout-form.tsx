@@ -58,10 +58,17 @@ export default function CheckoutForm({ defaultName }: { defaultName: string }) {
         />
       </div>
 
-      <div className="rounded-xl bg-surface-muted p-4 text-sm text-foreground-muted">
-        <strong className="text-foreground">Payment:</strong> Cash on delivery
-        will be selected for this demo. You can integrate Stripe / Paystack /
-        Chapa here.
+      <div className="rounded-xl bg-surface-muted p-4 text-sm">
+        <div className="flex items-center gap-2 font-medium text-foreground">
+          <span className="grid h-6 w-6 place-items-center rounded-full bg-accent-600 text-white text-xs font-bold">
+            ₿
+          </span>
+          Pay with Chapa
+        </div>
+        <p className="mt-1 text-foreground-muted">
+          You will be redirected to Chapa to complete your payment (Telebirr,
+          CBE, credit/debit card and more).
+        </p>
       </div>
 
       <button
@@ -69,7 +76,7 @@ export default function CheckoutForm({ defaultName }: { defaultName: string }) {
         disabled={pending}
         className="h-11 w-full rounded-lg bg-accent-600 font-medium text-white hover:bg-accent-700 disabled:opacity-60 transition-colors"
       >
-        {pending ? "Placing order…" : "Place order"}
+        {pending ? "Redirecting to Chapa…" : "Pay with Chapa"}
       </button>
     </form>
   );

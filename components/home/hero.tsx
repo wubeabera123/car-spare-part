@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Search, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ShieldCheck, Truck, Wrench } from "lucide-react";
 import { buttonStyles } from "@/components/ui/button";
+import { HeroVehicleSearch } from "@/components/home/hero-vehicle-search";
 
 export function Hero() {
   return (
@@ -40,54 +41,8 @@ export function Hero() {
             verified sellers. Fast delivery, fitment guaranteed.
           </p>
 
-          {/* Vehicle search */}
-          <form
-            action="/products"
-            className="mt-8 grid gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur sm:grid-cols-[1fr_auto]"
-          >
-            <div className="grid gap-2 sm:grid-cols-3">
-              <select
-                name="make"
-                className="h-12 rounded-lg bg-brand-800/80 px-3 text-sm focus-ring"
-              >
-                <option value="">Make</option>
-                <option>Toyota</option>
-                <option>Honda</option>
-                <option>Ford</option>
-                <option>Chevrolet</option>
-                <option>BMW</option>
-                <option>Mercedes-Benz</option>
-              </select>
-              <select
-                name="model"
-                className="h-12 rounded-lg bg-brand-800/80 px-3 text-sm focus-ring"
-              >
-                <option value="">Model</option>
-                <option>Camry</option>
-                <option>Civic</option>
-                <option>F-150</option>
-                <option>Silverado</option>
-                <option>3 Series</option>
-              </select>
-              <select
-                name="year"
-                className="h-12 rounded-lg bg-brand-800/80 px-3 text-sm focus-ring"
-              >
-                <option value="">Year</option>
-                {Array.from({ length: 25 }).map((_, i) => {
-                  const y = new Date().getFullYear() - i;
-                  return <option key={y}>{y}</option>;
-                })}
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-accent-600 px-6 font-medium hover:bg-accent-700 transition-colors focus-ring"
-            >
-              <Search className="h-4 w-4" />
-              Find parts
-            </button>
-          </form>
+          {/* Vehicle search — DB-backed, client-side */}
+          <HeroVehicleSearch />
 
           <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-brand-200">
             <div className="flex items-center gap-2">

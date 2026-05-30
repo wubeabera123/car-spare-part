@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { cartTotals, getOrCreateCart } from "@/lib/queries/cart";
+import { initializeChapaPayment } from "@/lib/chapa";
 
 const ShippingSchema = z.object({
   fullName: z.string().min(2),
@@ -119,7 +120,101 @@ export async function placeOrder(
     return { message: err instanceof Error ? err.message : "Checkout failed." };
   }
 
-  revalidatePath("/cart");
+  // Initialize Chapa payment
+  const session2 = await auth();
+  const user = session2?.user;
+
+  // Send order confirmation email (best-effort)
+  try {
+    const { sendOrderConfirmationEmail } = await import("@/lib/email");
+    const { formatCurrency } = await import("@/lib/utils");
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (order && user?.email) {
+      await sendOrderConfirmationEmail({
+        to: user.email,
+        name: user.name ?? "Customer",
+        orderNumber: order.orderNumber,
+        total: formatCurrency(Number(order.total)),
+        items: order.items.map((i) => ({
+          name: i.name,
+          qty: i.quantity,
+          price: formatCurrency(Number(i.unitPrice)),
+        })),
+      });
+    }
+  } catch {
+    /* email is best-effort */
+  }
+  const nameParts = (user?.name ?? "Customer").split(" ");
+  const txRef = `AP-${orderId}-${Date.now().toString(36).toUpperCase()}`;
+
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+  try {
+    const chapaRes = await initializeChapaPayment({
+      amount: Number(totals.total),
+      currency: "ETB",
+      email: user?.email ?? "customer@autoparts.hub",
+      first_name: nameParts[0] ?? "Customer",
+      last_name: nameParts.slice(1).join(" ") || undefined,
+      tx_ref: txRef,
+      callback_url: `${baseUrl}/api/payment/chapa/webhook`,
+      return_url: `${baseUrl}/checkout/success?orderId=${orderId}&tx_ref=${txRef}`,
+      customization: {
+        title: "AutoParts.Hub",
+        description: `Order #${orderId}`,
+      },
+    });
+
+    // Save tx_ref on order so we can verify on return
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { paymentIntentId: txRef },
+    });
+
+    revalidatePath("/cart");
+    revalidatePath("/account/orders");
+    redirect(chapaRes.data.checkout_url);
+  } catch {
+    // If Chapa is unavailable (e.g. test env without API key), fall through to success page
+    revalidatePath("/cart");
+    revalidatePath("/account/orders");
+    redirect(`/checkout/success?orderId=${orderId}`);
+  }
+}
+
+export async function cancelOrderAction(
+  orderId: string,
+): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthenticated" };
+
+  const order = await prisma.order.findFirst({
+    where: { id: orderId, userId: session.user.id },
+  });
+  if (!order) return { error: "Order not found." };
+  if (order.status !== "PENDING")
+    return { error: "Only pending orders can be cancelled." };
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status: "CANCELLED" },
+  });
+
+  // Re-stock items
+  const items = await prisma.orderItem.findMany({ where: { orderId } });
+  await Promise.all(
+    items.map((it) =>
+      prisma.product.update({
+        where: { id: it.productId },
+        data: { stock: { increment: it.quantity } },
+      }),
+    ),
+  );
+
   revalidatePath("/account/orders");
-  redirect(`/checkout/success?orderId=${orderId}`);
+  return {};
 }

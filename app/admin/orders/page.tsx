@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
+import { OrderStatusSelect } from "@/components/admin/admin-actions";
 
 export const metadata = { title: "Orders · Admin" };
 
@@ -46,7 +47,9 @@ export default async function AdminOrdersPage() {
                   #{o.orderNumber}
                 </td>
                 <td className="px-5 py-3">{o.user.name ?? o.user.email}</td>
-                <td className="px-5 py-3">{o.status}</td>
+                <td className="px-5 py-3">
+                  <OrderStatusSelect orderId={o.id} currentStatus={o.status} />
+                </td>
                 <td className="px-5 py-3">{o.items.length}</td>
                 <td className="px-5 py-3 text-foreground-muted">
                   {o.createdAt.toLocaleDateString()}

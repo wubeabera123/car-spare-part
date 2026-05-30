@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
+import { SellerStatusButtons } from "@/components/admin/admin-actions";
 
 export const metadata = { title: "Sellers · Admin" };
 
@@ -28,13 +29,14 @@ export default async function AdminSellersPage() {
               <th className="px-5 py-3">Products</th>
               <th className="px-5 py-3">Rating</th>
               <th className="px-5 py-3">Status</th>
+              <th className="px-5 py-3">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {sellers.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-5 py-10 text-center text-foreground-muted"
                 >
                   No sellers yet.
@@ -61,6 +63,12 @@ export default async function AdminSellersPage() {
                   >
                     {s.status}
                   </Badge>
+                </td>
+                <td className="px-5 py-3">
+                  <SellerStatusButtons
+                    sellerId={s.id}
+                    currentStatus={s.status}
+                  />
                 </td>
               </tr>
             ))}

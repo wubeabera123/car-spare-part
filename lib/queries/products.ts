@@ -13,12 +13,28 @@ export type ProductFilters = {
   sort?: "newest" | "price-asc" | "price-desc" | "rating" | "popular";
   page?: number;
   pageSize?: number;
+  // Vehicle compatibility filters
+  make?: string;
+  model?: string;
+  year?: number;
 };
 
 export async function getProducts(filters: ProductFilters = {}) {
   const {
-    q, category, brand, minPrice, maxPrice, condition, partType,
-    inStock, sort = "newest", page = 1, pageSize = 12,
+    q,
+    category,
+    brand,
+    minPrice,
+    maxPrice,
+    condition,
+    partType,
+    inStock,
+    sort = "newest",
+    page = 1,
+    pageSize = 12,
+    make,
+    model,
+    year,
   } = filters;
 
   const where: Prisma.ProductWhereInput = { isActive: true };
@@ -40,16 +56,36 @@ export async function getProducts(filters: ProductFilters = {}) {
     if (maxPrice !== undefined) where.price.lte = maxPrice;
   }
 
+  // Vehicle compatibility filter
+  if (make || model || year) {
+    const compatFilter: Prisma.VehicleCompatibilityWhereInput = {};
+    if (model) {
+      compatFilter.modelId = model;
+    } else if (make) {
+      compatFilter.model = { makeId: make };
+    }
+    if (year) {
+      compatFilter.yearStart = { lte: year };
+      compatFilter.yearEnd = { gte: year };
+    }
+    where.compatibilities = { some: compatFilter };
+  }
+
   const orderBy: Prisma.ProductOrderByWithRelationInput =
-    sort === "price-asc" ? { price: "asc" } :
-    sort === "price-desc" ? { price: "desc" } :
-    sort === "rating" ? { rating: "desc" } :
-    sort === "popular" ? { reviewCount: "desc" } :
-    { createdAt: "desc" };
+    sort === "price-asc"
+      ? { price: "asc" }
+      : sort === "price-desc"
+        ? { price: "desc" }
+        : sort === "rating"
+          ? { rating: "desc" }
+          : sort === "popular"
+            ? { reviewCount: "desc" }
+            : { createdAt: "desc" };
 
   const [items, total] = await Promise.all([
     prisma.product.findMany({
-      where, orderBy,
+      where,
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: { brand: true, category: true },
@@ -58,7 +94,10 @@ export async function getProducts(filters: ProductFilters = {}) {
   ]);
 
   return {
-    items, total, page, pageSize,
+    items,
+    total,
+    page,
+    pageSize,
     pageCount: Math.max(1, Math.ceil(total / pageSize)),
   };
 }
@@ -80,7 +119,10 @@ export async function getProductBySlug(slug: string) {
   });
 }
 
-export async function getRelatedProducts(productId: string, categoryId: string) {
+export async function getRelatedProducts(
+  productId: string,
+  categoryId: string,
+) {
   return prisma.product.findMany({
     where: { categoryId, isActive: true, id: { not: productId } },
     include: { brand: true },

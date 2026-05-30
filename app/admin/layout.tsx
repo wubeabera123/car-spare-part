@@ -10,12 +10,14 @@ import {
   Store,
   Percent,
   Settings,
+  Award,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tags },
+  { href: "/admin/brands", label: "Brands", icon: Award },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/sellers", label: "Sellers", icon: Store },

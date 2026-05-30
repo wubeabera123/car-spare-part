@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
+import { UserActiveToggle } from "@/components/admin/admin-actions";
 
 export const metadata = { title: "Users · Admin" };
 
@@ -12,6 +13,7 @@ export default async function AdminUsersPage() {
       name: true,
       email: true,
       role: true,
+      isActive: true,
       createdAt: true,
       _count: { select: { orders: true } },
     },
@@ -32,7 +34,9 @@ export default async function AdminUsersPage() {
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Role</th>
               <th className="px-5 py-3">Orders</th>
+              <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3">Joined</th>
+              <th className="px-5 py-3">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -44,8 +48,16 @@ export default async function AdminUsersPage() {
                   <Badge variant="brand">{u.role}</Badge>
                 </td>
                 <td className="px-5 py-3">{u._count.orders}</td>
+                <td className="px-5 py-3">
+                  <Badge variant={u.isActive ? "success" : "neutral"}>
+                    {u.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </td>
                 <td className="px-5 py-3 text-foreground-muted">
                   {u.createdAt.toLocaleDateString()}
+                </td>
+                <td className="px-5 py-3">
+                  <UserActiveToggle userId={u.id} isActive={u.isActive} />
                 </td>
               </tr>
             ))}

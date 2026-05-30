@@ -6,13 +6,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Format a number as USD currency. */
+/** Format a number as ETB currency. */
 export function formatCurrency(
   value: number | string,
-  currency: string = "USD",
+  currency: string = "ETB",
 ) {
   const num = typeof value === "string" ? parseFloat(value) : value;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("am-ET", {
     style: "currency",
     currency,
     minimumFractionDigits: 2,

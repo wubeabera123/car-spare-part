@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Search, ShoppingCart, Heart, User, Menu, Wrench } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Wrench } from "lucide-react";
 import { buttonStyles } from "@/components/ui/button";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 const NAV_LINKS = [
   { href: "/products", label: "Shop All" },
@@ -103,13 +104,7 @@ export function Header() {
           >
             Sign in
           </Link>
-          <button
-            type="button"
-            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-surface-muted focus-ring"
-            aria-label="Menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+          <MobileNav />
         </div>
       </div>
 

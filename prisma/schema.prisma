@@ -39,15 +39,18 @@ model User {
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
 
-    accounts      Account[]
-    sessions      Session[]
-    seller        Seller?
-    addresses     Address[]
-    cart          Cart?
-    orders        Order[]
-    reviews       Review[]
-    wishlist      WishlistItem[]
-    notifications Notification[]
+    isActive Boolean @default(true)
+
+    accounts       Account[]
+    sessions       Session[]
+    seller         Seller?
+    addresses      Address[]
+    cart           Cart?
+    orders         Order[]
+    reviews        Review[]
+    wishlist       WishlistItem[]
+    notifications  Notification[]
+    passwordResets PasswordResetToken[]
 
     @@index([email])
 }
@@ -91,17 +94,32 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+model PasswordResetToken {
+    id        String   @id @default(cuid())
+    userId    String
+    token     String   @unique
+    expiresAt DateTime
+    used      Boolean  @default(false)
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([token])
+}
+
 model Address {
     id         String   @id @default(cuid())
     userId     String
-    fullName   String
-    phone      String
+    label      String?
+    fullName   String   @default("")
+    phone      String?
     line1      String
     line2      String?
     city       String
     state      String?
-    postalCode String
-    country    String   @default("US")
+    postalCode String?
+    country    String   @default("ET")
     isDefault  Boolean  @default(false)
     createdAt  DateTime @default(now())
     updatedAt  DateTime @updatedAt
@@ -133,6 +151,7 @@ model Category {
     slug        String     @unique
     description String?
     image       String?
+    isFeatured  Boolean    @default(false)
     parentId    String?
     parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
     children    Category[] @relation("CategoryHierarchy")
@@ -185,7 +204,7 @@ model Product {
     description    String           @db.Text
     price          Decimal          @db.Decimal(10, 2)
     compareAtPrice Decimal?         @db.Decimal(10, 2)
-    currency       String           @default("USD")
+    currency       String           @default("ETB")
     condition      ProductCondition @default(NEW)
     partType       PartType         @default(AFTERMARKET)
     stock          Int              @default(0)
@@ -257,6 +276,9 @@ model Seller {
     totalSales  Int          @default(0)
     taxId       String?
     payoutEmail String?
+
+    contactEmail String?
+    contactPhone String?
 
     user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     products  Product[]
@@ -333,7 +355,7 @@ model Order {
     shipping        Decimal       @default(0) @db.Decimal(10, 2)
     tax             Decimal       @default(0) @db.Decimal(10, 2)
     total           Decimal       @db.Decimal(10, 2)
-    currency        String        @default("USD")
+    currency        String        @default("ETB")
     notes           String?
     paymentIntentId String?
     trackingNumber  String?

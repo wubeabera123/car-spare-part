@@ -2,8 +2,9 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { DeleteProductButton } from "@/components/seller/seller-actions";
 
 export const metadata = { title: "Products · Seller" };
 
@@ -47,13 +48,14 @@ export default async function SellerProductsPage() {
               <th className="px-5 py-3 font-medium">Price</th>
               <th className="px-5 py-3 font-medium">Stock</th>
               <th className="px-5 py-3 font-medium">Status</th>
+              <th className="px-5 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {products.length === 0 && (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-5 py-12 text-center text-foreground-muted"
                 >
                   No products yet. Add your first listing to get started.
@@ -80,6 +82,18 @@ export default async function SellerProductsPage() {
                   <Badge variant={p.isActive ? "success" : "neutral"}>
                     {p.isActive ? "Active" : "Hidden"}
                   </Badge>
+                </td>
+                <td className="px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/seller/products/${p.id}/edit`}
+                      className="inline-flex items-center gap-1 text-xs text-foreground-muted hover:text-foreground"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </Link>
+                    <DeleteProductButton productId={p.id} />
+                  </div>
                 </td>
               </tr>
             ))}

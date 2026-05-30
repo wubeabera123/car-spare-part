@@ -104,22 +104,75 @@ async function main() {
     ),
   );
 
-  // Vehicle data
-  const toyota = await prisma.vehicleMake.upsert({
-    where: { slug: "toyota" },
-    update: {},
-    create: { name: "Toyota", slug: "toyota" },
-  });
-  await prisma.vehicleModel.upsert({
-    where: { makeId_name: { makeId: toyota.id, name: "Camry" } },
-    update: {},
-    create: {
-      makeId: toyota.id,
-      name: "Camry",
-      yearStart: 2000,
-      yearEnd: 2025,
+  // Vehicle data — makes & models
+  const vehicleMakes = [
+    {
+      name: "Toyota",
+      slug: "toyota",
+      models: ["Camry", "Corolla", "Hilux", "Land Cruiser", "Yaris", "RAV4"],
     },
-  });
+    {
+      name: "Honda",
+      slug: "honda",
+      models: ["Civic", "Accord", "CR-V", "Pilot", "Fit"],
+    },
+    {
+      name: "Ford",
+      slug: "ford",
+      models: ["F-150", "Mustang", "Explorer", "Focus", "Ranger"],
+    },
+    {
+      name: "Chevrolet",
+      slug: "chevrolet",
+      models: ["Silverado", "Malibu", "Equinox", "Colorado"],
+    },
+    {
+      name: "BMW",
+      slug: "bmw",
+      models: ["3 Series", "5 Series", "X3", "X5", "7 Series"],
+    },
+    {
+      name: "Mercedes-Benz",
+      slug: "mercedes-benz",
+      models: ["C-Class", "E-Class", "GLE", "S-Class"],
+    },
+    {
+      name: "Hyundai",
+      slug: "hyundai",
+      models: ["Elantra", "Tucson", "Santa Fe", "Accent"],
+    },
+    {
+      name: "Volkswagen",
+      slug: "volkswagen",
+      models: ["Golf", "Passat", "Tiguan", "Polo"],
+    },
+    {
+      name: "Nissan",
+      slug: "nissan",
+      models: ["Altima", "Pathfinder", "Frontier", "Navara"],
+    },
+    { name: "Isuzu", slug: "isuzu", models: ["D-Max", "MU-X", "Trooper"] },
+  ];
+
+  for (const makeData of vehicleMakes) {
+    const make = await prisma.vehicleMake.upsert({
+      where: { slug: makeData.slug },
+      update: {},
+      create: { name: makeData.name, slug: makeData.slug },
+    });
+    for (const modelName of makeData.models) {
+      await prisma.vehicleModel.upsert({
+        where: { makeId_name: { makeId: make.id, name: modelName } },
+        update: {},
+        create: {
+          makeId: make.id,
+          name: modelName,
+          yearStart: 2005,
+          yearEnd: 2025,
+        },
+      });
+    }
+  }
 
   // Sample products
   const samples = [

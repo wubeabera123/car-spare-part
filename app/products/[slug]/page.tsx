@@ -14,6 +14,8 @@ import { Rating } from "@/components/ui/rating";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, discountPercent } from "@/lib/utils";
 import { AddToCartForm } from "@/components/product/add-to-cart-form";
+import { ReviewForm } from "@/components/product/review-form";
+import { auth } from "@/auth";
 
 export async function generateMetadata({
   params,
@@ -40,6 +42,7 @@ export default async function ProductPage({
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
+  const session = await auth();
   const related = await getRelatedProducts(product.id, product.categoryId);
   const price = Number(product.price);
   const compareAt = product.compareAtPrice
@@ -280,6 +283,19 @@ export default async function ProductPage({
               </li>
             ))}
           </ul>
+        )}
+
+        {session?.user ? (
+          <div className="mt-8">
+            <ReviewForm productId={product.id} productSlug={product.slug} />
+          </div>
+        ) : (
+          <p className="mt-6 text-sm text-foreground-muted">
+            <Link href="/login" className="text-accent-600 hover:underline">
+              Sign in
+            </Link>{" "}
+            to write a review.
+          </p>
         )}
       </section>
 

@@ -14,6 +14,9 @@ type SearchParams = {
   inStock?: string;
   sort?: "newest" | "price-asc" | "price-desc" | "rating" | "popular";
   page?: string;
+  make?: string;
+  model?: string;
+  year?: string;
 };
 
 export const metadata = { title: "Shop all parts" };
@@ -40,6 +43,9 @@ export default async function ProductsPage({
       inStock: sp.inStock === "1",
       sort: sp.sort,
       page,
+      make: sp.make,
+      model: sp.model,
+      year: sp.year ? parseInt(sp.year, 10) : undefined,
     }),
     getCategories(),
     getBrands(),

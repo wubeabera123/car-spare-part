@@ -3,11 +3,15 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Package } from "lucide-react";
+import { Package, Truck } from "lucide-react";
+import { CancelOrderButton } from "@/components/account/cancel-order-button";
 
 export const metadata = { title: "Orders" };
 
-const STATUS_VARIANT: Record<string, "neutral" | "warning" | "success" | "accent" | "brand"> = {
+const STATUS_VARIANT: Record<
+  string,
+  "neutral" | "warning" | "success" | "accent" | "brand"
+> = {
   PENDING: "warning",
   PAID: "brand",
   PROCESSING: "brand",
@@ -46,18 +50,41 @@ export default async function OrdersPage() {
       ) : (
         <ul className="mt-6 space-y-4">
           {orders.map((o) => (
-            <li key={o.id} className="rounded-xl border border-border bg-surface p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <li
+              key={o.id}
+              className="rounded-xl border border-border bg-surface p-5"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs text-foreground-muted">Order #{o.orderNumber}</p>
-                  <p className="text-sm">
-                    {o.createdAt.toLocaleDateString()} ·{" "}
-                    {o.items.length} item{o.items.length !== 1 ? "s" : ""}
+                  <p className="text-xs text-foreground-muted">
+                    Order #{o.orderNumber}
                   </p>
+                  <p className="text-sm">
+                    {o.createdAt.toLocaleDateString()} · {o.items.length} item
+                    {o.items.length !== 1 ? "s" : ""}
+                  </p>
+                  {o.trackingNumber && o.status === "SHIPPED" && (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-brand-600">
+                      <Truck className="h-3.5 w-3.5" />
+                      <span>
+                        Tracking:{" "}
+                        <span className="font-mono font-medium">
+                          {o.trackingNumber}
+                        </span>
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant={STATUS_VARIANT[o.status]}>{o.status}</Badge>
-                  <p className="font-semibold">{formatCurrency(Number(o.total))}</p>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={STATUS_VARIANT[o.status]}>{o.status}</Badge>
+                    <p className="font-semibold">
+                      {formatCurrency(Number(o.total))}
+                    </p>
+                  </div>
+                  {o.status === "PENDING" && (
+                    <CancelOrderButton orderId={o.id} />
+                  )}
                 </div>
               </div>
             </li>

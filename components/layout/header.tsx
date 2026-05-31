@@ -39,7 +39,15 @@ export async function Header() {
         })
       )?.image ?? null)
     : null;
-
+  // Cart item count
+  const cartCount = user?.id
+    ? await prisma.cartItem
+        .aggregate({
+          _sum: { quantity: true },
+          where: { cart: { userId: user.id } },
+        })
+        .then((r) => r._sum.quantity ?? 0)
+    : 0;
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-surface/85 backdrop-blur supports-backdrop-filter:bg-surface/65">
       {/* Announcement bar */}
@@ -109,9 +117,14 @@ export async function Header() {
           <Link
             href="/cart"
             className="relative inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-surface-muted focus-ring"
-            aria-label="Cart"
+            aria-label={`Cart${cartCount > 0 ? ` (${cartCount} items)` : ""}`}
           >
             <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent-600 px-0.5 text-[10px] font-bold leading-none text-white">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
           </Link>
 
           {user ? (

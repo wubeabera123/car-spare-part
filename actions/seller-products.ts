@@ -37,9 +37,23 @@ function slugify(s: string) {
 async function getSellerOrFail() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
-  const seller = await prisma.seller.findUnique({
+
+  let seller = await prisma.seller.findUnique({
     where: { userId: session.user.id },
   });
+
+  // Auto-create a seller profile for ADMIN users so they can manage products
+  if (!seller && session.user.role === "ADMIN") {
+    seller = await prisma.seller.create({
+      data: {
+        userId: session.user.id,
+        storeName: "Admin Store",
+        storeSlug: `admin-store-${session.user.id.slice(-6)}`,
+        status: "APPROVED",
+      },
+    });
+  }
+
   if (!seller) return { session, seller: null };
   return { session, seller };
 }

@@ -1,13 +1,17 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { LayoutDashboard, Boxes, ListOrdered, Settings } from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 
 const NAV = [
-  { href: "/seller", label: "Overview", icon: LayoutDashboard },
-  { href: "/seller/products", label: "Products", icon: Boxes },
-  { href: "/seller/orders", label: "Orders", icon: ListOrdered },
-  { href: "/seller/store", label: "Store settings", icon: Settings },
+  {
+    href: "/seller",
+    label: "Overview",
+    iconName: "LayoutDashboard",
+    exact: true,
+  },
+  { href: "/seller/products", label: "Products", iconName: "Boxes" },
+  { href: "/seller/orders", label: "Orders", iconName: "ListOrdered" },
+  { href: "/seller/store", label: "Store settings", iconName: "Settings" },
 ];
 
 export default async function SellerLayout({
@@ -34,19 +38,15 @@ export default async function SellerLayout({
             </p>
           </div>
           <nav className="mt-3 rounded-xl border border-border bg-surface p-2">
-            {NAV.map((n) => {
-              const Icon = n.icon;
-              return (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-surface-muted"
-                >
-                  <Icon className="h-4 w-4 text-foreground-muted" />
-                  {n.label}
-                </Link>
-              );
-            })}
+            {NAV.map((n) => (
+              <NavLink
+                key={n.href}
+                href={n.href}
+                label={n.label}
+                iconName={n.iconName}
+                exact={n.exact}
+              />
+            ))}
           </nav>
         </aside>
         <main>{children}</main>

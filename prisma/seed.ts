@@ -50,7 +50,19 @@ async function main() {
     },
   });
 
-  // Seller profile
+  // Seller profiles
+  await prisma.seller.upsert({
+    where: { userId: admin.id },
+    update: {},
+    create: {
+      userId: admin.id,
+      storeName: "Admin Store",
+      storeSlug: "admin-store",
+      description: "Admin seller profile.",
+      status: SellerStatus.APPROVED,
+    },
+  });
+
   const seller = await prisma.seller.upsert({
     where: { userId: sellerUser.id },
     update: {},

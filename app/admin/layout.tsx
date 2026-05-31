@@ -1,28 +1,22 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import {
-  LayoutDashboard,
-  Users,
-  Package,
-  Tags,
-  ShoppingBag,
-  Store,
-  Percent,
-  Settings,
-  Award,
-} from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 
 const NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/categories", label: "Categories", icon: Tags },
-  { href: "/admin/brands", label: "Brands", icon: Award },
-  { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/sellers", label: "Sellers", icon: Store },
-  { href: "/admin/promotions", label: "Promotions", icon: Percent },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  {
+    href: "/admin",
+    label: "Overview",
+    iconName: "LayoutDashboard",
+    exact: true,
+  },
+  { href: "/admin/products", label: "Products", iconName: "Package" },
+  { href: "/admin/categories", label: "Categories", iconName: "Tags" },
+  { href: "/admin/brands", label: "Brands", iconName: "Award" },
+  { href: "/admin/orders", label: "Orders", iconName: "ShoppingBag" },
+  { href: "/admin/users", label: "Users", iconName: "Users" },
+  { href: "/admin/sellers", label: "Sellers", iconName: "Store" },
+  { href: "/admin/promotions", label: "Promotions", iconName: "Percent" },
+  { href: "/admin/settings", label: "Settings", iconName: "Settings" },
 ];
 
 export default async function AdminLayout({
@@ -48,19 +42,15 @@ export default async function AdminLayout({
               </p>
             </div>
             <nav className="mt-3 rounded-xl border border-border bg-surface p-2">
-              {NAV.map((n) => {
-                const Icon = n.icon;
-                return (
-                  <Link
-                    key={n.href}
-                    href={n.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-surface-muted"
-                  >
-                    <Icon className="h-4 w-4 text-foreground-muted" />
-                    {n.label}
-                  </Link>
-                );
-              })}
+              {NAV.map((n) => (
+                <NavLink
+                  key={n.href}
+                  href={n.href}
+                  label={n.label}
+                  iconName={n.iconName}
+                  exact={n.exact}
+                />
+              ))}
             </nav>
           </aside>
           <main>{children}</main>

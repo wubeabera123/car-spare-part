@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getProducts, getCategories, getBrands } from "@/lib/queries/products";
 import { ProductCard } from "@/components/product/product-card";
 import { SortSelect } from "@/components/product/sort-select";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 
 type SearchParams = {
   q?: string;
@@ -31,7 +33,7 @@ export default async function ProductsPage({
   const minPrice = sp.minPrice ? parseFloat(sp.minPrice) : undefined;
   const maxPrice = sp.maxPrice ? parseFloat(sp.maxPrice) : undefined;
 
-  const [data, categories, brands] = await Promise.all([
+  const [data, categories, brands, session] = await Promise.all([
     getProducts({
       q: sp.q,
       category: sp.category,
@@ -49,7 +51,18 @@ export default async function ProductsPage({
     }),
     getCategories(),
     getBrands(),
+    auth(),
   ]);
+
+  // Build a Set of wishlisted product IDs for the current user
+  const wishlistedIds = new Set<string>();
+  if (session?.user?.id) {
+    const wishlistItems = await prisma.wishlistItem.findMany({
+      where: { userId: session.user.id },
+      select: { productId: true },
+    });
+    wishlistItems.forEach((w) => wishlistedIds.add(w.productId));
+  }
 
   return (
     <div className="container-page py-10">
@@ -223,6 +236,7 @@ export default async function ProductsPage({
                     stock: p.stock,
                     partType: p.partType,
                     condition: p.condition,
+                    wishlisted: wishlistedIds.has(p.id),
                   }}
                 />
               ))}

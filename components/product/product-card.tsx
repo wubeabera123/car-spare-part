@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Rating } from "@/components/ui/rating";
 import { formatCurrency, discountPercent } from "@/lib/utils";
+import { WishlistButton } from "@/components/product/wishlist-button";
 
 export type ProductCardData = {
   id: string;
@@ -17,6 +18,7 @@ export type ProductCardData = {
   stock: number;
   partType?: "OEM" | "AFTERMARKET";
   condition?: "NEW" | "USED" | "REFURBISHED";
+  wishlisted?: boolean;
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -26,7 +28,10 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-soft transition-all hover:shadow-card hover:-translate-y-0.5">
       {/* Image */}
-      <Link href={`/products/${product.slug}`} className="relative aspect-square overflow-hidden bg-surface-muted">
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative aspect-square overflow-hidden bg-surface-muted"
+      >
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -40,19 +45,18 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           </div>
         )}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          {discount > 0 && (
-            <Badge variant="accent">-{discount}%</Badge>
-          )}
+          {discount > 0 && <Badge variant="accent">-{discount}%</Badge>}
           {product.partType === "OEM" && <Badge variant="brand">OEM</Badge>}
-          {product.condition === "USED" && <Badge variant="warning">Used</Badge>}
+          {product.condition === "USED" && (
+            <Badge variant="warning">Used</Badge>
+          )}
         </div>
-        <button
-          type="button"
-          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-surface/90 opacity-0 transition-opacity group-hover:opacity-100 focus-ring"
-          aria-label="Add to wishlist"
-        >
-          <Heart className="h-4 w-4" />
-        </button>
+        <div className="absolute right-3 top-3">
+          <WishlistButton
+            productId={product.id}
+            initialWishlisted={product.wishlisted ?? false}
+          />
+        </div>
       </Link>
 
       {/* Body */}
@@ -70,7 +74,11 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             {product.name}
           </Link>
         </h3>
-        <Rating value={product.rating} count={product.reviewCount} className="mt-2" />
+        <Rating
+          value={product.rating}
+          count={product.reviewCount}
+          className="mt-2"
+        />
 
         <div className="mt-auto pt-3 flex items-end justify-between gap-2">
           <div>
@@ -78,11 +86,12 @@ export function ProductCard({ product }: { product: ProductCardData }) {
               <span className="text-lg font-semibold tracking-tight">
                 {formatCurrency(product.price)}
               </span>
-              {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <span className="text-xs text-foreground-muted line-through">
-                  {formatCurrency(product.compareAtPrice)}
-                </span>
-              )}
+              {product.compareAtPrice &&
+                product.compareAtPrice > product.price && (
+                  <span className="text-xs text-foreground-muted line-through">
+                    {formatCurrency(product.compareAtPrice)}
+                  </span>
+                )}
             </div>
             <p
               className={

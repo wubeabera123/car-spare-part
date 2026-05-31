@@ -1,14 +1,13 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
-import { LogOut, Package, Heart, MapPin, User as UserIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { LogOut } from "lucide-react";
+import { NavLink } from "@/components/ui/nav-link";
 
 const NAV = [
-  { href: "/account", label: "Profile", icon: UserIcon },
-  { href: "/account/orders", label: "Orders", icon: Package },
-  { href: "/wishlist", label: "Wishlist", icon: Heart },
-  { href: "/account/addresses", label: "Addresses", icon: MapPin },
+  { href: "/account", label: "Profile", iconName: "User", exact: true },
+  { href: "/account/orders", label: "Orders", iconName: "Package" },
+  { href: "/wishlist", label: "Wishlist", iconName: "Heart", exact: true },
+  { href: "/account/addresses", label: "Addresses", iconName: "MapPin" },
 ];
 
 export default async function AccountLayout({
@@ -33,21 +32,15 @@ export default async function AccountLayout({
             </span>
           </div>
           <nav className="rounded-xl border border-border bg-surface p-2">
-            {NAV.map((n) => {
-              const Icon = n.icon;
-              return (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm hover:bg-surface-muted",
-                  )}
-                >
-                  <Icon className="h-4 w-4 text-foreground-muted" />
-                  {n.label}
-                </Link>
-              );
-            })}
+            {NAV.map((n) => (
+              <NavLink
+                key={n.href}
+                href={n.href}
+                label={n.label}
+                iconName={n.iconName}
+                exact={n.exact}
+              />
+            ))}
             <form
               action={async () => {
                 "use server";

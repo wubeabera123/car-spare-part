@@ -199,7 +199,11 @@ export default async function ProductPage({
               </div>
             </div>
             <Link
-              href={`/sellers/${product.seller.storeSlug}`}
+              href={
+                product.brand?.slug
+                  ? `/brands/${product.brand.slug}`
+                  : "/brands"
+              }
               className="text-sm font-medium text-brand-600 hover:text-accent-600"
             >
               View store →

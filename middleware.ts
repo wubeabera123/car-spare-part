@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const PROTECTED = [/^\/account/, /^\/checkout/, /^\/wishlist/];
-const SELLER_ONLY = [/^\/seller/];
-const ADMIN_ONLY = [/^\/admin/];
+const PROTECTED = [
+  /^\/account(?:\/|$)/,
+  /^\/checkout(?:\/|$)/,
+  /^\/wishlist(?:\/|$)/,
+];
+const SELLER_ONLY = [/^\/seller(?:\/|$)/];
+const ADMIN_ONLY = [/^\/admin(?:\/|$)/];
 
 export default async function middleware(req: NextRequest) {
   const { nextUrl } = req;
